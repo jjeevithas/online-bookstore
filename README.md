@@ -56,7 +56,7 @@ mvn clean spring-boot:run
 ```
 
 Open:
-`http://localhost:8080`
+`http://localhost:8081`
 
 ### 4. Alternative
 You can also run `OnlineBookstoreApplication.java` using the VS Code Run button.
