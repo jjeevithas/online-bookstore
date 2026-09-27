@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Book Details</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="nav">
+            <a class="logo" href="/">BookNest</a>
+
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/cart.html">Cart</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- Book Details -->
+        <div id="details" class="details"></div>
+
+        <!-- Write a Review -->
+        <section class="review-section">
+
+            <h2>Write a Review</h2>
+
+            <form id="reviewForm">
+
+                <input
+                    type="text"
+                    id="username"
+                    placeholder="Your Name"
+                    required
+                >
+
+                <textarea
+                    id="comment"
+                    placeholder="Write your review"
+                    required
+                ></textarea>
+
+                <select id="rating" required>
+                    <option value="">Select Rating</option>
+                    <option value="1">⭐ 1</option>
+                    <option value="2">⭐ 2</option>
+                    <option value="3">⭐ 3</option>
+                    <option value="4">⭐ 4</option>
+                    <option value="5">⭐ 5</option>
+                </select>
+
+                <button type="submit" class="primary">
+                    Submit Review
+                </button>
+
+            </form>
+
+            <p id="reviewMessage"></p>
+
+        </section>
+
+    </main>
+
+    <script>
+
+        // Get book ID from URL
+        const id = new URLSearchParams(location.search).get("id");
+
+        // Load book details
+        fetch("/books/" + id)
+            .then(response => response.json())
+            .then(book => {
+
+                document.getElementById("details").innerHTML = `
+
+                    <img
+                        src="${book.imageUrl || 'https://via.placeholder.com/300x430?text=Book'}"
+                        alt="${book.title}"
+                        onerror="this.onerror=null; this.src='https://via.placeholder.com/300x430?text=Book'"
+                    >
+
+                    <div>
+
+                        <p class="tag">BOOK DETAILS</p>
+
+                        <h1>${book.title}</h1>
+
+                        <h3>by ${book.author}</h3>
+
+                        <p>${book.description || ""}</p>
+
+                        <div class="price">
+                            ₹${Number(book.price).toFixed(2)}
+                        </div>
+
+                        <button
+                            class="primary"
+                            onclick="add(${book.id})">
+                            Add to Cart
+                        </button>
+
+                    </div>
+
+                `;
+
+            })
+            .catch(error => {
+                console.error("Error loading book:", error);
+            });
+
+
+        // Add book to cart
+        function add(bookId) {
+
+            fetch("/cart", {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    bookId: bookId
+                })
+            })
+            .then(() => {
+
+                alert("Book added to cart!");
+
+                location.href = "/cart.html";
+
+            })
+            .catch(error => {
+                console.error("Error adding to cart:", error);
+            });
+
+        }
+
+
+        // Submit review
+        document.getElementById("reviewForm")
+            .addEventListener("submit", function(event) {
+
+                event.preventDefault();
+
+                const review = {
+
+                    bookId: Number(id),
+
+                    username: document.getElementById("username").value,
+
+                    comment: document.getElementById("comment").value,
+
+                    rating: Number(document.getElementById("rating").value)
+
+                };
+
+                fetch("/reviews", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify(review)
+
+                })
+                .then(response => response.text())
+                .then(message => {
+
+                    document.getElementById("reviewMessage")
+                        .textContent = message;
+
+                    document.getElementById("reviewForm").reset();
+
+                })
+                .catch(error => {
+
+                    console.error("Error submitting review:", error);
+
+                    document.getElementById("reviewMessage")
+                        .textContent = "Unable to submit review.";
+
+                });
+
+            });
+
+    </script>
+
+</body>
+
+</html>

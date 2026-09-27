@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Your Cart</title><link rel="stylesheet" href="/css/style.css"></head>
+<body><header><div class="nav"><a class="logo" href="/">BookNest</a><div class="nav-links"><a href="/">Home</a><a href="/cart.html">Cart</a></div></div></header>
+<main><h1>Your Shopping Cart</h1><div id="cart"></div></main>
+<script>
+function loadCart(){fetch('/cart').then(r=>r.json()).then(data=>{
+let html='';
+if(!data.items.length){html='<div class="empty"><h2>Your cart is empty</h2><a class="primary linkbtn" href="/">Browse Books</a></div>'}
+else{data.items.forEach(i=>html+=`<div class="cart-item"><img src="${i.book.imageUrl}" onerror="this.src='https://via.placeholder.com/80x110?text=Book'"><div class="grow"><h3>${i.book.title}</h3><p>${i.book.author}</p><p>Quantity: ${i.quantity}</p></div><strong>₹${i.subtotal.toFixed(2)}</strong><button class="danger" onclick="removeItem(${i.id})">Remove</button></div>`);
+html+=`<div class="summary"><h2>Total: ₹${data.total.toFixed(2)}</h2><button class="primary" onclick="checkout()">Proceed to Checkout</button></div>`}
+document.getElementById('cart').innerHTML=html;});}
+function removeItem(id){fetch('/cart/'+id,{method:'DELETE'}).then(loadCart)}
+function checkout(){fetch('/checkout',{method:'POST'}).then(r=>r.json()).then(d=>{if(d.success)location.href='/checkout.html?orderId='+d.orderId+'&total='+d.total;else alert(d.message)})}
+loadCart();
+</script></body></html>
